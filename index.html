@@ -3,69 +3,241 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>3D Игра — Сбор монет</title>
+    <title>FNAF — Пять ночей</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #0b0b1a;
-            overflow: hidden;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a0a;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             color: #fff;
+            overflow: hidden;
         }
-        canvas {
-            display: block;
-            border-radius: 20px;
-            box-shadow: 0 0 60px rgba(124,58,237,0.1);
+        .game-container {
+            width: 100%;
+            max-width: 900px;
+            height: 100vh;
+            max-height: 700px;
+            background: radial-gradient(ellipse at center, #1a1a2e, #0a0a0a);
+            border-radius: 30px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 80px rgba(80, 0, 0, 0.3);
+            border: 1px solid rgba(255, 50, 50, 0.1);
         }
-        .ui {
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 16px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 16px;
+            border-bottom: 2px solid #2a0a0a;
+            font-size: 14px;
+            color: #aa8888;
+        }
+        .header .night {
+            color: #ff5555;
+            font-weight: 700;
+            font-size: 18px;
+            text-shadow: 0 0 20px rgba(255,0,0,0.2);
+        }
+        .header .power {
+            color: #ffaa00;
+        }
+        .header .power span {
+            font-weight: 700;
+        }
+        .main-area {
+            flex: 1;
+            display: flex;
+            gap: 16px;
+            margin: 12px 0;
+            min-height: 0;
+        }
+        /* ОФИС (основное поле) */
+        .office {
+            flex: 2;
+            background: radial-gradient(ellipse at 50% 80%, #1a1a1a, #050505);
+            border-radius: 24px;
+            border: 1px solid rgba(255,50,50,0.05);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .office .desk {
+            width: 80%;
+            height: 30%;
+            background: linear-gradient(0deg, #1a0a0a, transparent);
             position: absolute;
-            top: 20px;
+            bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            display: flex;
-            gap: 40px;
-            font-size: 20px;
-            font-weight: 600;
-            background: rgba(0,0,0,0.4);
-            padding: 12px 30px;
-            border-radius: 40px;
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.04);
-            z-index: 10;
+            border-radius: 50% 50% 0 0 / 30% 30% 0 0;
+            border-top: 2px solid rgba(255,50,50,0.1);
         }
-        .ui span { color: #c4b5fd; }
-        .ui .coins span { color: #f9a825; }
-        .ui .lives span { color: #f5576c; }
+        .office .screen-flicker {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent 60%, rgba(0,0,0,0.4));
+            pointer-events: none;
+            animation: flicker 3s infinite;
+        }
+        @keyframes flicker {
+            0%, 95% { opacity: 0; }
+            96% { opacity: 0.3; }
+            100% { opacity: 0; }
+        }
+        .office .status-text {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            color: rgba(255,100,100,0.3);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        /* КАМЕРЫ (справа) */
+        .cameras {
+            flex: 1;
+            background: rgba(0,0,0,0.6);
+            border-radius: 24px;
+            border: 1px solid rgba(255,50,50,0.05);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 150px;
+        }
+        .cameras .cam-title {
+            font-size: 12px;
+            color: #aa5555;
+            text-align: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(255,50,50,0.05);
+            padding-bottom: 6px;
+        }
+        .camera-btn {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,50,50,0.05);
+            border-radius: 14px;
+            padding: 10px 8px;
+            color: #886666;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: inherit;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .camera-btn:hover {
+            background: rgba(255,50,50,0.05);
+            border-color: rgba(255,50,50,0.15);
+        }
+        .camera-btn .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #44aa44;
+            box-shadow: 0 0 10px #44aa44;
+            transition: 0.3s;
+        }
+        .camera-btn .dot.danger {
+            background: #ff4444;
+            box-shadow: 0 0 15px #ff4444;
+        }
+        .camera-btn .cam-name {
+            font-weight: 500;
+        }
+        .camera-btn .cam-status {
+            font-size: 11px;
+            color: #665555;
+        }
+        /* ДВЕРИ (кнопки внизу) */
+        .doors {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            padding: 8px 0;
+        }
+        .door-btn {
+            padding: 10px 28px;
+            border-radius: 40px;
+            border: 1px solid rgba(255,50,50,0.1);
+            background: rgba(0,0,0,0.3);
+            color: #886666;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: inherit;
+            flex: 1;
+            max-width: 150px;
+        }
+        .door-btn:hover {
+            background: rgba(255,50,50,0.05);
+            border-color: rgba(255,50,50,0.2);
+        }
+        .door-btn.active {
+            background: rgba(255,50,50,0.1);
+            border-color: #ff4444;
+            color: #ff4444;
+            box-shadow: 0 0 30px rgba(255,0,0,0.1);
+        }
+        .door-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
         .game-over {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(12px);
-            padding: 40px 50px;
-            border-radius: 30px;
-            border: 1px solid rgba(255,255,255,0.04);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
             display: none;
-            z-index: 20;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 30px;
+            z-index: 10;
+        }
+        .game-over.show {
+            display: flex;
         }
         .game-over h1 {
-            font-size: 40px;
-            color: #f5576c;
+            font-size: 48px;
+            color: #ff2222;
+            text-shadow: 0 0 60px rgba(255,0,0,0.3);
             margin-bottom: 8px;
         }
         .game-over p {
             font-size: 18px;
-            color: rgba(255,255,255,0.4);
+            color: #886666;
             margin-bottom: 20px;
         }
         .game-over button {
-            padding: 12px 40px;
+            padding: 14px 48px;
             border-radius: 40px;
             border: none;
             background: linear-gradient(135deg, #7c3aed, #a78bfa);
@@ -80,325 +252,294 @@
             transform: scale(1.05);
             box-shadow: 0 8px 30px rgba(124,58,237,0.3);
         }
+        .win {
+            color: #44dd44 !important;
+            text-shadow: 0 0 60px rgba(0,255,0,0.2) !important;
+        }
         @media (max-width: 700px) {
-            .ui { font-size: 14px; padding: 8px 18px; gap: 20px; }
-            .game-over { padding: 24px 20px; }
-            .game-over h1 { font-size: 28px; }
+            .main-area { flex-direction: column; }
+            .cameras { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+            .cameras .cam-title { width: 100%; }
+            .camera-btn { flex: 1; min-width: 80px; }
+            .door-btn { max-width: 100px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="ui">
-        <div class="coins">🪙 <span id="coinCount">0</span></div>
-        <div class="lives">❤️ <span id="lifeCount">3</span></div>
+    <div class="game-container" id="app">
+        <!-- ШАПКА -->
+        <div class="header">
+            <div class="night">🌙 Ночь <span id="nightNum">1</span></div>
+            <div class="power">⚡ Энергия: <span id="powerNum">100</span>%</div>
+        </div>
+
+        <!-- ОСНОВНАЯ ОБЛАСТЬ -->
+        <div class="main-area">
+            <!-- ОФИС -->
+            <div class="office" id="office">
+                <div class="desk"></div>
+                <div class="screen-flicker"></div>
+                <div class="status-text" id="statusText">🔴 ВСЁ СПОКОЙНО</div>
+                <div id="animatronicDisplay" style="position:absolute; top:20%; font-size:60px; opacity:0.7; pointer-events:none; text-shadow: 0 0 40px rgba(255,0,0,0.2);"></div>
+            </div>
+
+            <!-- КАМЕРЫ -->
+            <div class="cameras">
+                <div class="cam-title">📹 КАМЕРЫ</div>
+                <button class="camera-btn" data-cam="cam1">
+                    <span class="cam-name">📹 Зал</span>
+                    <span class="cam-status" id="cam1Status">Пусто</span>
+                    <span class="dot" id="cam1Dot"></span>
+                </button>
+                <button class="camera-btn" data-cam="cam2">
+                    <span class="cam-name">📹 Коридор</span>
+                    <span class="cam-status" id="cam2Status">Пусто</span>
+                    <span class="dot" id="cam2Dot"></span>
+                </button>
+                <button class="camera-btn" data-cam="cam3">
+                    <span class="cam-name">📹 Склад</span>
+                    <span class="cam-status" id="cam3Status">Пусто</span>
+                    <span class="dot" id="cam3Dot"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ДВЕРИ -->
+        <div class="doors">
+            <button class="door-btn" id="leftDoor">🚪 Левая дверь</button>
+            <button class="door-btn" id="rightDoor">🚪 Правая дверь</button>
+        </div>
+
+        <!-- ЭКРАН ПОРАЖЕНИЯ -->
+        <div class="game-over" id="gameOver">
+            <h1 id="resultTitle">💀 ВАС НАШЛИ</h1>
+            <p id="resultDesc">Вы продержались 0 ночей</p>
+            <button id="restartBtn">🔄 Начать заново</button>
+        </div>
     </div>
 
-    <div class="game-over" id="gameOver">
-        <h1>💀 Игра окончена</h1>
-        <p>Ты собрал <span id="finalCoins">0</span> монет</p>
-        <button id="restartBtn">🔄 Играть снова</button>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         // ============================================================
-        // НАСТРОЙКИ
+        // FNAF — ИГРОВАЯ ЛОГИКА
         // ============================================================
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0b0b1a);
-        scene.fog = new THREE.Fog(0x0b0b1a, 20, 40);
+        const state = {
+            night: 1,
+            power: 100,
+            leftDoor: false,
+            rightDoor: false,
+            animatronics: {
+                freddy: { name: 'Фредди', pos: 'cam1', danger: false, speed: 0.3 },
+                bonnie: { name: 'Бонни', pos: 'cam2', danger: false, speed: 0.4 },
+                chica: { name: 'Чика', pos: 'cam3', danger: false, speed: 0.35 }
+            },
+            gameOver: false,
+            win: false,
+            interval: null,
+            powerInterval: null,
+            moveInterval: null,
+            nightTimer: 0,
+            maxNightTime: 60 // секунд на ночь
+        };
 
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
-        camera.position.set(0, 8, 12);
-        camera.lookAt(0, 0, 0);
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        document.body.prepend(renderer.domElement);
-
-        // ============================================================
-        // СВЕТ
-        // ============================================================
-        const ambient = new THREE.AmbientLight(0x222244, 0.5);
-        scene.add(ambient);
-
-        const dirLight = new THREE.DirectionalLight(0xffeedd, 1);
-        dirLight.position.set(5, 10, 5);
-        dirLight.castShadow = true;
-        dirLight.shadow.mapSize.width = 1024;
-        dirLight.shadow.mapSize.height = 1024;
-        scene.add(dirLight);
-
-        const pointLight = new THREE.PointLight(0x7c3aed, 0.5, 20);
-        pointLight.position.set(-2, 4, 2);
-        scene.add(pointLight);
-
-        // ============================================================
-        // ЗВЁЗДЫ НА ФОНЕ
-        // ============================================================
-        const starsGeo = new THREE.BufferGeometry();
-        const starCount = 800;
-        const starPos = new Float32Array(starCount * 3);
-        for (let i = 0; i < starCount * 3; i++) {
-            starPos[i] = (Math.random() - 0.5) * 200;
-        }
-        starsGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-        const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.12, transparent: true, opacity: 0.6 });
-        const starsMesh = new THREE.Points(starsGeo, starMat);
-        scene.add(starsMesh);
-
-        // ============================================================
-        // ПОЛ (сетка)
-        // ============================================================
-        const gridHelper = new THREE.GridHelper(50, 20, 0x7c3aed, 0x3a2a6a);
-        gridHelper.position.y = -0.5;
-        scene.add(gridHelper);
-
-        // ============================================================
-        // ИГРОК (ШАР)
-        // ============================================================
-        const playerGeo = new THREE.SphereGeometry(0.6, 32, 32);
-        const playerMat = new THREE.MeshPhysicalMaterial({
-            color: 0x7c3aed,
-            metalness: 0.3,
-            roughness: 0.2,
-            emissive: 0x3a1a6a,
-            emissiveIntensity: 0.2,
-            clearcoat: 0.4,
-        });
-        const player = new THREE.Mesh(playerGeo, playerMat);
-        player.position.set(0, 0.6, 0);
-        player.castShadow = true;
-        scene.add(player);
-
-        // Светящееся кольцо вокруг игрока
-        const ringGeo = new THREE.RingGeometry(0.8, 1.0, 32);
-        const ringMat = new THREE.MeshBasicMaterial({
-            color: 0x7c3aed,
-            transparent: true,
-            opacity: 0.3,
-            side: THREE.DoubleSide,
-        });
-        const ring = new THREE.Mesh(ringGeo, ringMat);
-        ring.rotation.x = -Math.PI / 2;
-        ring.position.y = 0.05;
-        player.add(ring);
-
-        // ============================================================
-        // МОНЕТЫ
-        // ============================================================
-        const coins = [];
-        const coinMat = new THREE.MeshPhysicalMaterial({
-            color: 0xf9a825,
-            metalness: 0.8,
-            roughness: 0.2,
-            emissive: 0xf9a825,
-            emissiveIntensity: 0.1,
-        });
-
-        function spawnCoin() {
-            const geo = new THREE.CylinderGeometry(0.25, 0.25, 0.08, 16);
-            const mesh = new THREE.Mesh(geo, coinMat);
-            const x = (Math.random() - 0.5) * 20;
-            const z = (Math.random() - 0.5) * 20;
-            if (Math.abs(x) < 2 && Math.abs(z) < 2) return;
-            mesh.position.set(x, 0.6, z);
-            mesh.rotation.x = Math.PI / 2;
-            mesh.userData = { collected: false, spinSpeed: 0.02 + Math.random() * 0.02 };
-            scene.add(mesh);
-            coins.push(mesh);
-        }
-
-        for (let i = 0; i < 30; i++) spawnCoin();
-
-        // ============================================================
-        // ПРЕПЯТСТВИЯ
-        // ============================================================
-        const obstacles = [];
-        const obsMat = new THREE.MeshPhysicalMaterial({
-            color: 0xf5576c,
-            metalness: 0.2,
-            roughness: 0.5,
-            emissive: 0x881122,
-            emissiveIntensity: 0.2,
-        });
-
-        function spawnObstacle() {
-            const geo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-            const mesh = new THREE.Mesh(geo, obsMat);
-            const x = (Math.random() - 0.5) * 18;
-            const z = (Math.random() - 0.5) * 18;
-            if (Math.abs(x) < 3 && Math.abs(z) < 3) return;
-            mesh.position.set(x, 0.5, z);
-            mesh.userData = { speed: 0.01 + Math.random() * 0.01 };
-            scene.add(mesh);
-            obstacles.push(mesh);
-        }
-
-        for (let i = 0; i < 15; i++) spawnObstacle();
-
-        // ============================================================
-        // УПРАВЛЕНИЕ
-        // ============================================================
-        const keys = { w: false, a: false, s: false, d: false };
-        let playerSpeed = 0.08;
-
-        document.addEventListener('keydown', (e) => {
-            const key = e.key.toLowerCase();
-            if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
-                keys[key] = true;
-                e.preventDefault();
-            }
-        });
-        document.addEventListener('keyup', (e) => {
-            const key = e.key.toLowerCase();
-            if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
-                keys[key] = false;
-                e.preventDefault();
-            }
-        });
-
-        // ============================================================
-        // ИГРОВЫЕ ПЕРЕМЕННЫЕ
-        // ============================================================
-        let score = 0;
-        let lives = 3;
-        let gameActive = true;
-        const coinCountEl = document.getElementById('coinCount');
-        const lifeCountEl = document.getElementById('lifeCount');
+        // DOM элементы
+        const nightNum = document.getElementById('nightNum');
+        const powerNum = document.getElementById('powerNum');
+        const statusText = document.getElementById('statusText');
+        const leftDoorBtn = document.getElementById('leftDoor');
+        const rightDoorBtn = document.getElementById('rightDoor');
         const gameOverEl = document.getElementById('gameOver');
-        const finalCoinsEl = document.getElementById('finalCoins');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultDesc = document.getElementById('resultDesc');
+        const restartBtn = document.getElementById('restartBtn');
+        const animatronicDisplay = document.getElementById('animatronicDisplay');
 
-        function updateUI() {
-            coinCountEl.textContent = score;
-            lifeCountEl.textContent = lives;
-        }
-
-        document.getElementById('restartBtn').addEventListener('click', () => {
-            score = 0;
-            lives = 3;
-            gameActive = true;
-            player.position.set(0, 0.6, 0);
-            gameOverEl.style.display = 'none';
-            updateUI();
-            coins.forEach(c => { c.visible = true; c.userData.collected = false; });
-            obstacles.forEach(o => { o.visible = true; });
-        });
-
-        // ============================================================
-        // АНИМАЦИЯ
-        // ============================================================
-        function animate() {
-            requestAnimationFrame(animate);
-
-            if (gameActive) {
-                let dx = 0, dz = 0;
-                if (keys.w) dz = -playerSpeed;
-                if (keys.s) dz = playerSpeed;
-                if (keys.a) dx = -playerSpeed;
-                if (keys.d) dx = playerSpeed;
-
-                if (dx !== 0 && dz !== 0) {
-                    dx *= 0.707;
-                    dz *= 0.707;
-                }
-
-                let newX = player.position.x + dx;
-                let newZ = player.position.z + dz;
-                const bound = 9;
-                player.position.x = Math.max(-bound, Math.min(bound, newX));
-                player.position.z = Math.max(-bound, Math.min(bound, newZ));
-
-                if (dx !== 0 || dz !== 0) {
-                    player.rotation.x += dz * 0.5;
-                    player.rotation.z -= dx * 0.5;
-                }
-
-                coins.forEach(c => {
-                    if (!c.visible) return;
-                    c.rotation.z += c.userData.spinSpeed;
-                    c.position.y = 0.6 + Math.sin(Date.now() * 0.002 + c.id) * 0.15;
-                });
-
-                coins.forEach(c => {
-                    if (!c.visible || c.userData.collected) return;
-                    const dist = player.position.distanceTo(c.position);
-                    if (dist < 1.0) {
-                        c.visible = false;
-                        c.userData.collected = true;
-                        score++;
-                        updateUI();
-                    }
-                });
-
-                obstacles.forEach(o => {
-                    if (!o.visible) return;
-                    const dist = player.position.distanceTo(o.position);
-                    if (dist < 1.0) {
-                        o.visible = false;
-                        lives--;
-                        updateUI();
-                        if (lives <= 0) {
-                            gameActive = false;
-                            finalCoinsEl.textContent = score;
-                            gameOverEl.style.display = 'block';
-                        }
-                    }
-                });
-
-                obstacles.forEach(o => {
-                    if (!o.visible) return;
-                    o.rotation.x += 0.02;
-                    o.rotation.z += 0.01;
-                    o.position.y = 0.5 + Math.sin(Date.now() * 0.001 + o.id) * 0.15;
-                });
-
-                camera.position.x = player.position.x * 0.5;
-                camera.position.z = player.position.z * 0.5 + 12;
-                camera.lookAt(player.position.x * 0.3, 0, player.position.z * 0.3);
-
-                starsMesh.rotation.y += 0.0002;
+        // Обновление UI камер
+        function updateCameras() {
+            const anims = state.animatronics;
+            const camStatus = { cam1: [], cam2: [], cam3: [] };
+            for (let key in anims) {
+                const a = anims[key];
+                if (a.pos) camStatus[a.pos].push(a.name);
             }
-
-            renderer.render(scene, camera);
+            ['cam1', 'cam2', 'cam3'].forEach((cam, idx) => {
+                const statusEl = document.getElementById(cam + 'Status');
+                const dotEl = document.getElementById(cam + 'Dot');
+                const names = camStatus[cam];
+                if (names.length > 0) {
+                    statusEl.textContent = names.join(', ');
+                    dotEl.className = 'dot danger';
+                } else {
+                    statusEl.textContent = 'Пусто';
+                    dotEl.className = 'dot';
+                }
+            });
         }
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+        // Проверка безопасности
+        function checkSafety() {
+            const anims = state.animatronics;
+            let danger = false;
+            let dangerMsg = '🔴 ВСЁ СПОКОЙНО';
+            for (let key in anims) {
+                const a = anims[key];
+                if (a.pos === 'office') {
+                    danger = true;
+                    dangerMsg = `⚠️ ${a.name} В ОФИСЕ!`;
+                    break;
+                }
+            }
+            statusText.textContent = dangerMsg;
+            if (danger) {
+                gameOver('💀 ВАС НАШЛИ', `Вас нашёл ${Object.values(anims).find(a => a.pos === 'office').name}`);
+            }
+            return !danger;
+        }
+
+        // Передвижение аниматроников
+        function moveAnimatronics() {
+            if (state.gameOver) return;
+            const anims = state.animatronics;
+            const rooms = ['cam1', 'cam2', 'cam3', 'office'];
+            for (let key in anims) {
+                const a = anims[key];
+                if (Math.random() < a.speed * 0.1) {
+                    let newPos;
+                    do {
+                        newPos = rooms[Math.floor(Math.random() * rooms.length)];
+                    } while (newPos === a.pos && Math.random() > 0.3);
+                    a.pos = newPos;
+                }
+            }
+            updateCameras();
+            checkSafety();
+            // Обновление отображения аниматроника в офисе
+            const officeAnim = Object.values(anims).find(a => a.pos === 'office');
+            if (officeAnim) {
+                animatronicDisplay.textContent = '👾';
+            } else {
+                animatronicDisplay.textContent = '';
+            }
+        }
+
+        // Игра окончена
+        function gameOver(title, desc) {
+            if (state.gameOver) return;
+            state.gameOver = true;
+            clearInterval(state.interval);
+            clearInterval(state.powerInterval);
+            clearInterval(state.moveInterval);
+            resultTitle.textContent = title;
+            resultDesc.textContent = desc || 'Вы продержались ' + state.night + ' ночей';
+            gameOverEl.classList.add('show');
+        }
+
+        // Победа (ночь пройдена)
+        function winNight() {
+            if (state.gameOver) return;
+            state.night++;
+            if (state.night > 5) {
+                // Полная победа
+                state.gameOver = true;
+                clearInterval(state.interval);
+                clearInterval(state.powerInterval);
+                clearInterval(state.moveInterval);
+                resultTitle.textContent = '🏆 ВЫ ВЫЖИЛИ!';
+                resultTitle.className = 'win';
+                resultDesc.textContent = 'Вы прошли все 5 ночей!';
+                gameOverEl.classList.add('show');
+                return;
+            }
+            nightNum.textContent = state.night;
+            state.nightTimer = 0;
+            state.power = 100;
+            powerNum.textContent = state.power;
+            statusText.textContent = '🌙 Ночь ' + state.night + ' началась';
+            // Сброс позиций аниматроников
+            const rooms = ['cam1', 'cam2', 'cam3'];
+            for (let key in state.animatronics) {
+                state.animatronics[key].pos = rooms[Math.floor(Math.random() * rooms.length)];
+            }
+            updateCameras();
+        }
+
+        // Энергия
+        function consumePower() {
+            if (state.gameOver) return;
+            let drain = 1;
+            if (state.leftDoor) drain += 2;
+            if (state.rightDoor) drain += 2;
+            state.power = Math.max(0, state.power - drain * 0.5);
+            powerNum.textContent = Math.floor(state.power);
+            if (state.power <= 0) {
+                gameOver('⚡ НЕТ ЭНЕРГИИ', 'Вы не смогли продержаться до утра');
+            }
+        }
+
+        // Таймер ночи
+        function nightTimerTick() {
+            if (state.gameOver) return;
+            state.nightTimer++;
+            if (state.nightTimer >= state.maxNightTime) {
+                winNight();
+            }
+        }
+
+        // Перезапуск
+        function restartGame() {
+            state.night = 1;
+            state.power = 100;
+            state.leftDoor = false;
+            state.rightDoor = false;
+            state.gameOver = false;
+            state.nightTimer = 0;
+            state.maxNightTime = 60;
+            gameOverEl.classList.remove('show');
+            gameOverEl.querySelector('h1').className = '';
+            nightNum.textContent = '1';
+            powerNum.textContent = '100';
+            statusText.textContent = '🔴 ВСЁ СПОКОЙНО';
+            leftDoorBtn.classList.remove('active');
+            rightDoorBtn.classList.remove('active');
+            const rooms = ['cam1', 'cam2', 'cam3'];
+            for (let key in state.animatronics) {
+                state.animatronics[key].pos = rooms[Math.floor(Math.random() * rooms.length)];
+            }
+            updateCameras();
+            animatronicDisplay.textContent = '';
+            clearInterval(state.interval);
+            clearInterval(state.powerInterval);
+            clearInterval(state.moveInterval);
+            startGame();
+        }
+
+        // Старт игры
+        function startGame() {
+            state.interval = setInterval(nightTimerTick, 1000);
+            state.powerInterval = setInterval(consumePower, 1000);
+            state.moveInterval = setInterval(moveAnimatronics, 3000);
+            updateCameras();
+        }
+
+        // Управление дверями
+        leftDoorBtn.addEventListener('click', function() {
+            if (state.gameOver) return;
+            state.leftDoor = !state.leftDoor;
+            this.classList.toggle('active');
+            statusText.textContent = state.leftDoor ? '🚪 Левая дверь закрыта' : '🔴 ВСЁ СПОКОЙНО';
+        });
+        rightDoorBtn.addEventListener('click', function() {
+            if (state.gameOver) return;
+            state.rightDoor = !state.rightDoor;
+            this.classList.toggle('active');
+            statusText.textContent = state.rightDoor ? '🚪 Правая дверь закрыта' : '🔴 ВСЁ СПОКОЙНО';
         });
 
-        updateUI();
-        animate();
+        // Перезапуск
+        restartBtn.addEventListener('click', restartGame);
 
-        // Тач-управление для телефона
-        let touchStartX = 0, touchStartY = 0;
-        renderer.domElement.addEventListener('touchstart', (e) => {
-            const touch = e.touches[0];
-            touchStartX = touch.clientX;
-            touchStartY = touch.clientY;
-        }, { passive: true });
-
-        renderer.domElement.addEventListener('touchmove', (e) => {
-            if (!gameActive) return;
-            const touch = e.touches[0];
-            const dx = touch.clientX - touchStartX;
-            const dy = touch.clientY - touchStartY;
-            const moveX = Math.max(-1, Math.min(1, dx / 30)) * playerSpeed * 1.5;
-            const moveZ = Math.max(-1, Math.min(1, dy / 30)) * playerSpeed * 1.5;
-            let newX = player.position.x + moveX;
-            let newZ = player.position.z + moveZ;
-            const bound = 9;
-            player.position.x = Math.max(-bound, Math.min(bound, newX));
-            player.position.z = Math.max(-bound, Math.min(bound, newZ));
-            touchStartX = touch.clientX;
-            touchStartY = touch.clientY;
-        }, { passive: true });
+        // СТАРТ
+        startGame();
     </script>
 </body>
 </html>
