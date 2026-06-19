@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>3D Игра — Сбор монет</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0b0b1a;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #fff;
+        }
+        canvas {
+            display: block;
+            border-radius: 20px;
+            box-shadow: 0 0 60px rgba(124,58,237,0.1);
+        }
+        .ui {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 40px;
+            font-size: 20px;
+            font-weight: 600;
+            background: rgba(0,0,0,0.4);
+            padding: 12px 30px;
+            border-radius: 40px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.04);
+            z-index: 10;
+        }
+        .ui span { color: #c4b5fd; }
+        .ui .coins span { color: #f9a825; }
+        .ui .lives span { color: #f5576c; }
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(12px);
+            padding: 40px 50px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.04);
+            display: none;
+            z-index: 20;
+        }
+        .game-over h1 {
+            font-size: 40px;
+            color: #f5576c;
+            margin-bottom: 8px;
+        }
+        .game-over p {
+            font-size: 18px;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 20px;
+        }
+        .game-over button {
+            padding: 12px 40px;
+            border-radius: 40px;
+            border: none;
+            background: linear-gradient(135deg, #7c3aed, #a78bfa);
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: inherit;
+        }
+        .game-over button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(124,58,237,0.3);
+        }
+        @media (max-width: 700px) {
+            .ui { font-size: 14px; padding: 8px 18px; gap: 20px; }
+            .game-over { padding: 24px 20px; }
+            .game-over h1 { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ui">
+        <div class="coins">🪙 <span id="coinCount">0</span></div>
+        <div class="lives">❤️ <span id="lifeCount">3</span></div>
+    </div>
+
+    <div class="game-over" id="gameOver">
+        <h1>💀 Игра окончена</h1>
+        <p>Ты собрал <span id="finalCoins">0</span> монет</p>
+        <button id="restartBtn">🔄 Играть снова</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // ============================================================
+        // НАСТРОЙКИ
+        // ============================================================
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0b0b1a);
+        scene.fog = new THREE.Fog(0x0b0b1a, 20, 40);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 8, 12);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.prepend(renderer.domElement);
+
+        // ============================================================
+        // СВЕТ
+        // ============================================================
+        const ambient = new THREE.AmbientLight(0x222244, 0.5);
+        scene.add(ambient);
+
+        const dirLight = new THREE.DirectionalLight(0xffeedd, 1);
+        dirLight.position.set(5, 10, 5);
+        dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 1024;
+        dirLight.shadow.mapSize.height = 1024;
+        scene.add(dirLight);
+
+        const pointLight = new THREE.PointLight(0x7c3aed, 0.5, 20);
+        pointLight.position.set(-2, 4, 2);
+        scene.add(pointLight);
+
+        // ============================================================
+        // ЗВЁЗДЫ НА ФОНЕ
+        // ============================================================
+        const starsGeo = new THREE.BufferGeometry();
+        const starCount = 800;
+        const starPos = new Float32Array(starCount * 3);
+        for (let i = 0; i < starCount * 3; i++) {
+            starPos[i] = (Math.random() - 0.5) * 200;
+        }
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+        const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.12, transparent: true, opacity: 0.6 });
+        const starsMesh = new THREE.Points(starsGeo, starMat);
+        scene.add(starsMesh);
+
+        // ============================================================
+        // ПОЛ (сетка)
+        // ============================================================
+        const gridHelper = new THREE.GridHelper(50, 20, 0x7c3aed, 0x3a2a6a);
+        gridHelper.position.y = -0.5;
+        scene.add(gridHelper);
+
+        // ============================================================
+        // ИГРОК (ШАР)
+        // ============================================================
+        const playerGeo = new THREE.SphereGeometry(0.6, 32, 32);
+        const playerMat = new THREE.MeshPhysicalMaterial({
+            color: 0x7c3aed,
+            metalness: 0.3,
+            roughness: 0.2,
+            emissive: 0x3a1a6a,
+            emissiveIntensity: 0.2,
+            clearcoat: 0.4,
+        });
+        const player = new THREE.Mesh(playerGeo, playerMat);
+        player.position.set(0, 0.6, 0);
+        player.castShadow = true;
+        scene.add(player);
+
+        // Светящееся кольцо вокруг игрока
+        const ringGeo = new THREE.RingGeometry(0.8, 1.0, 32);
+        const ringMat = new THREE.MeshBasicMaterial({
+            color: 0x7c3aed,
+            transparent: true,
+            opacity: 0.3,
+            side: THREE.DoubleSide,
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.y = 0.05;
+        player.add(ring);
+
+        // ============================================================
+        // МОНЕТЫ
+        // ============================================================
+        const coins = [];
+        const coinMat = new THREE.MeshPhysicalMaterial({
+            color: 0xf9a825,
+            metalness: 0.8,
+            roughness: 0.2,
+            emissive: 0xf9a825,
+            emissiveIntensity: 0.1,
+        });
+
+        function spawnCoin() {
+            const geo = new THREE.CylinderGeometry(0.25, 0.25, 0.08, 16);
+            const mesh = new THREE.Mesh(geo, coinMat);
+            const x = (Math.random() - 0.5) * 20;
+            const z = (Math.random() - 0.5) * 20;
+            if (Math.abs(x) < 2 && Math.abs(z) < 2) return;
+            mesh.position.set(x, 0.6, z);
+            mesh.rotation.x = Math.PI / 2;
+            mesh.userData = { collected: false, spinSpeed: 0.02 + Math.random() * 0.02 };
+            scene.add(mesh);
+            coins.push(mesh);
+        }
+
+        for (let i = 0; i < 30; i++) spawnCoin();
+
+        // ============================================================
+        // ПРЕПЯТСТВИЯ
+        // ============================================================
+        const obstacles = [];
+        const obsMat = new THREE.MeshPhysicalMaterial({
+            color: 0xf5576c,
+            metalness: 0.2,
+            roughness: 0.5,
+            emissive: 0x881122,
+            emissiveIntensity: 0.2,
+        });
+
+        function spawnObstacle() {
+            const geo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            const mesh = new THREE.Mesh(geo, obsMat);
+            const x = (Math.random() - 0.5) * 18;
+            const z = (Math.random() - 0.5) * 18;
+            if (Math.abs(x) < 3 && Math.abs(z) < 3) return;
+            mesh.position.set(x, 0.5, z);
+            mesh.userData = { speed: 0.01 + Math.random() * 0.01 };
+            scene.add(mesh);
+            obstacles.push(mesh);
+        }
+
+        for (let i = 0; i < 15; i++) spawnObstacle();
+
+        // ============================================================
+        // УПРАВЛЕНИЕ
+        // ============================================================
+        const keys = { w: false, a: false, s: false, d: false };
+        let playerSpeed = 0.08;
+
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
+                keys[key] = true;
+                e.preventDefault();
+            }
+        });
+        document.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            if (key === 'w' || key === 'a' || key === 's' || key === 'd') {
+                keys[key] = false;
+                e.preventDefault();
+            }
+        });
+
+        // ============================================================
+        // ИГРОВЫЕ ПЕРЕМЕННЫЕ
+        // ============================================================
+        let score = 0;
+        let lives = 3;
+        let gameActive = true;
+        const coinCountEl = document.getElementById('coinCount');
+        const lifeCountEl = document.getElementById('lifeCount');
+        const gameOverEl = document.getElementById('gameOver');
+        const finalCoinsEl = document.getElementById('finalCoins');
+
+        function updateUI() {
+            coinCountEl.textContent = score;
+            lifeCountEl.textContent = lives;
+        }
+
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            score = 0;
+            lives = 3;
+            gameActive = true;
+            player.position.set(0, 0.6, 0);
+            gameOverEl.style.display = 'none';
+            updateUI();
+            coins.forEach(c => { c.visible = true; c.userData.collected = false; });
+            obstacles.forEach(o => { o.visible = true; });
+        });
+
+        // ============================================================
+        // АНИМАЦИЯ
+        // ============================================================
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (gameActive) {
+                let dx = 0, dz = 0;
+                if (keys.w) dz = -playerSpeed;
+                if (keys.s) dz = playerSpeed;
+                if (keys.a) dx = -playerSpeed;
+                if (keys.d) dx = playerSpeed;
+
+                if (dx !== 0 && dz !== 0) {
+                    dx *= 0.707;
+                    dz *= 0.707;
+                }
+
+                let newX = player.position.x + dx;
+                let newZ = player.position.z + dz;
+                const bound = 9;
+                player.position.x = Math.max(-bound, Math.min(bound, newX));
+                player.position.z = Math.max(-bound, Math.min(bound, newZ));
+
+                if (dx !== 0 || dz !== 0) {
+                    player.rotation.x += dz * 0.5;
+                    player.rotation.z -= dx * 0.5;
+                }
+
+                coins.forEach(c => {
+                    if (!c.visible) return;
+                    c.rotation.z += c.userData.spinSpeed;
+                    c.position.y = 0.6 + Math.sin(Date.now() * 0.002 + c.id) * 0.15;
+                });
+
+                coins.forEach(c => {
+                    if (!c.visible || c.userData.collected) return;
+                    const dist = player.position.distanceTo(c.position);
+                    if (dist < 1.0) {
+                        c.visible = false;
+                        c.userData.collected = true;
+                        score++;
+                        updateUI();
+                    }
+                });
+
+                obstacles.forEach(o => {
+                    if (!o.visible) return;
+                    const dist = player.position.distanceTo(o.position);
+                    if (dist < 1.0) {
+                        o.visible = false;
+                        lives--;
+                        updateUI();
+                        if (lives <= 0) {
+                            gameActive = false;
+                            finalCoinsEl.textContent = score;
+                            gameOverEl.style.display = 'block';
+                        }
+                    }
+                });
+
+                obstacles.forEach(o => {
+                    if (!o.visible) return;
+                    o.rotation.x += 0.02;
+                    o.rotation.z += 0.01;
+                    o.position.y = 0.5 + Math.sin(Date.now() * 0.001 + o.id) * 0.15;
+                });
+
+                camera.position.x = player.position.x * 0.5;
+                camera.position.z = player.position.z * 0.5 + 12;
+                camera.lookAt(player.position.x * 0.3, 0, player.position.z * 0.3);
+
+                starsMesh.rotation.y += 0.0002;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        updateUI();
+        animate();
+
+        // Тач-управление для телефона
+        let touchStartX = 0, touchStartY = 0;
+        renderer.domElement.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+        }, { passive: true });
+
+        renderer.domElement.addEventListener('touchmove', (e) => {
+            if (!gameActive) return;
+            const touch = e.touches[0];
+            const dx = touch.clientX - touchStartX;
+            const dy = touch.clientY - touchStartY;
+            const moveX = Math.max(-1, Math.min(1, dx / 30)) * playerSpeed * 1.5;
+            const moveZ = Math.max(-1, Math.min(1, dy / 30)) * playerSpeed * 1.5;
+            let newX = player.position.x + moveX;
+            let newZ = player.position.z + moveZ;
+            const bound = 9;
+            player.position.x = Math.max(-bound, Math.min(bound, newX));
+            player.position.z = Math.max(-bound, Math.min(bound, newZ));
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+        }, { passive: true });
+    </script>
+</body>
+</html>
