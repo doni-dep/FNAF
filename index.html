@@ -23,9 +23,9 @@
         }
         .game-container {
             width: 100%;
-            max-width: 900px;
+            max-width: 1000px;
             height: 100vh;
-            max-height: 700px;
+            max-height: 750px;
             background: radial-gradient(ellipse at center, #1a1a2e, #0a0a0a);
             border-radius: 30px;
             padding: 20px;
@@ -65,7 +65,6 @@
             margin: 12px 0;
             min-height: 0;
         }
-        /* ОФИС (основное поле) */
         .office {
             flex: 2;
             background: radial-gradient(ellipse at 50% 80%, #1a1a1a, #050505);
@@ -108,12 +107,26 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 14px;
-            color: rgba(255,100,100,0.3);
+            font-size: 16px;
+            color: rgba(255,100,100,0.4);
             letter-spacing: 2px;
             text-transform: uppercase;
+            font-weight: 600;
+            text-shadow: 0 0 20px rgba(255,0,0,0.1);
         }
-        /* КАМЕРЫ (справа) */
+        .office .animatronic-display {
+            position: absolute;
+            top: 15%;
+            font-size: 80px;
+            opacity: 0.6;
+            pointer-events: none;
+            text-shadow: 0 0 60px rgba(255,0,0,0.3);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
         .cameras {
             flex: 1;
             background: rgba(0,0,0,0.6);
@@ -122,8 +135,8 @@
             padding: 12px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            min-width: 150px;
+            gap: 6px;
+            min-width: 160px;
         }
         .cameras .cam-title {
             font-size: 12px;
@@ -133,18 +146,18 @@
             text-transform: uppercase;
             border-bottom: 1px solid rgba(255,50,50,0.05);
             padding-bottom: 6px;
+            margin-bottom: 4px;
         }
         .camera-btn {
             background: rgba(255,255,255,0.02);
             border: 1px solid rgba(255,50,50,0.05);
             border-radius: 14px;
-            padding: 10px 8px;
+            padding: 10px 10px;
             color: #886666;
             font-size: 13px;
             cursor: pointer;
             transition: 0.3s;
             font-family: inherit;
-            text-align: left;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -154,16 +167,21 @@
             border-color: rgba(255,50,50,0.15);
         }
         .camera-btn .dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: #44aa44;
-            box-shadow: 0 0 10px #44aa44;
+            box-shadow: 0 0 15px #44aa44;
             transition: 0.3s;
         }
         .camera-btn .dot.danger {
             background: #ff4444;
-            box-shadow: 0 0 15px #ff4444;
+            box-shadow: 0 0 25px #ff4444;
+            animation: blink 0.8s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
         .camera-btn .cam-name {
             font-weight: 500;
@@ -172,7 +190,6 @@
             font-size: 11px;
             color: #665555;
         }
-        /* ДВЕРИ (кнопки внизу) */
         .doors {
             display: flex;
             gap: 12px;
@@ -180,28 +197,28 @@
             padding: 8px 0;
         }
         .door-btn {
-            padding: 10px 28px;
+            padding: 12px 32px;
             border-radius: 40px;
             border: 1px solid rgba(255,50,50,0.1);
             background: rgba(0,0,0,0.3);
             color: #886666;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
             font-family: inherit;
             flex: 1;
-            max-width: 150px;
+            max-width: 180px;
         }
         .door-btn:hover {
             background: rgba(255,50,50,0.05);
             border-color: rgba(255,50,50,0.2);
         }
         .door-btn.active {
-            background: rgba(255,50,50,0.1);
+            background: rgba(255,50,50,0.15);
             border-color: #ff4444;
             color: #ff4444;
-            box-shadow: 0 0 30px rgba(255,0,0,0.1);
+            box-shadow: 0 0 40px rgba(255,0,0,0.1);
         }
         .door-btn:disabled {
             opacity: 0.3;
@@ -213,7 +230,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             backdrop-filter: blur(8px);
             display: none;
             flex-direction: column;
@@ -226,42 +243,76 @@
             display: flex;
         }
         .game-over h1 {
-            font-size: 48px;
+            font-size: 52px;
             color: #ff2222;
-            text-shadow: 0 0 60px rgba(255,0,0,0.3);
+            text-shadow: 0 0 80px rgba(255,0,0,0.3);
             margin-bottom: 8px;
         }
+        .game-over h1.win {
+            color: #44dd44;
+            text-shadow: 0 0 80px rgba(0,255,0,0.2);
+        }
         .game-over p {
-            font-size: 18px;
+            font-size: 20px;
             color: #886666;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
         .game-over button {
-            padding: 14px 48px;
+            padding: 16px 56px;
             border-radius: 40px;
             border: none;
             background: linear-gradient(135deg, #7c3aed, #a78bfa);
             color: #fff;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
             font-family: inherit;
+            box-shadow: 0 8px 30px rgba(124,58,237,0.2);
         }
         .game-over button:hover {
             transform: scale(1.05);
-            box-shadow: 0 8px 30px rgba(124,58,237,0.3);
+            box-shadow: 0 8px 40px rgba(124,58,237,0.4);
         }
-        .win {
-            color: #44dd44 !important;
-            text-shadow: 0 0 60px rgba(0,255,0,0.2) !important;
+        .night-popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            padding: 30px 50px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,50,50,0.1);
+            text-align: center;
+            z-index: 5;
+            display: none;
+        }
+        .night-popup.show {
+            display: block;
+            animation: popIn 0.5s ease;
+        }
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        .night-popup h2 {
+            font-size: 28px;
+            color: #ff5555;
+            margin-bottom: 4px;
+        }
+        .night-popup p {
+            color: #886666;
         }
         @media (max-width: 700px) {
             .main-area { flex-direction: column; }
             .cameras { flex-direction: row; flex-wrap: wrap; justify-content: center; }
             .cameras .cam-title { width: 100%; }
             .camera-btn { flex: 1; min-width: 80px; }
-            .door-btn { max-width: 100px; }
+            .door-btn { max-width: 120px; font-size: 13px; padding: 10px 16px; }
+            .game-over h1 { font-size: 32px; }
+            .night-popup { padding: 20px 24px; }
+            .night-popup h2 { font-size: 22px; }
         }
     </style>
 </head>
@@ -281,7 +332,7 @@
                 <div class="desk"></div>
                 <div class="screen-flicker"></div>
                 <div class="status-text" id="statusText">🔴 ВСЁ СПОКОЙНО</div>
-                <div id="animatronicDisplay" style="position:absolute; top:20%; font-size:60px; opacity:0.7; pointer-events:none; text-shadow: 0 0 40px rgba(255,0,0,0.2);"></div>
+                <div class="animatronic-display" id="animatronicDisplay"></div>
             </div>
 
             <!-- КАМЕРЫ -->
@@ -311,6 +362,12 @@
             <button class="door-btn" id="rightDoor">🚪 Правая дверь</button>
         </div>
 
+        <!-- УВЕДОМЛЕНИЕ О НОВОЙ НОЧИ -->
+        <div class="night-popup" id="nightPopup">
+            <h2>🌙 Ночь <span id="popupNight">1</span></h2>
+            <p>Продержитесь до утра</p>
+        </div>
+
         <!-- ЭКРАН ПОРАЖЕНИЯ -->
         <div class="game-over" id="gameOver">
             <h1 id="resultTitle">💀 ВАС НАШЛИ</h1>
@@ -321,17 +378,18 @@
 
     <script>
         // ============================================================
-        // FNAF — ИГРОВАЯ ЛОГИКА
+        // FNAF — ПОЛНАЯ ЛОГИКА
         // ============================================================
         const state = {
             night: 1,
             power: 100,
+            maxPower: 100,
             leftDoor: false,
             rightDoor: false,
             animatronics: {
-                freddy: { name: 'Фредди', pos: 'cam1', danger: false, speed: 0.3 },
-                bonnie: { name: 'Бонни', pos: 'cam2', danger: false, speed: 0.4 },
-                chica: { name: 'Чика', pos: 'cam3', danger: false, speed: 0.35 }
+                freddy: { name: 'Фредди', pos: 'cam1', emoji: '🐻', speed: 0.25 },
+                bonnie: { name: 'Бонни', pos: 'cam2', emoji: '🐰', speed: 0.35 },
+                chica: { name: 'Чика', pos: 'cam3', emoji: '🐤', speed: 0.3 }
             },
             gameOver: false,
             win: false,
@@ -339,10 +397,11 @@
             powerInterval: null,
             moveInterval: null,
             nightTimer: 0,
-            maxNightTime: 60 // секунд на ночь
+            maxNightTime: 50,
+            isNightPopup: false
         };
 
-        // DOM элементы
+        // DOM
         const nightNum = document.getElementById('nightNum');
         const powerNum = document.getElementById('powerNum');
         const statusText = document.getElementById('statusText');
@@ -353,8 +412,10 @@
         const resultDesc = document.getElementById('resultDesc');
         const restartBtn = document.getElementById('restartBtn');
         const animatronicDisplay = document.getElementById('animatronicDisplay');
+        const nightPopup = document.getElementById('nightPopup');
+        const popupNight = document.getElementById('popupNight');
 
-        // Обновление UI камер
+        // Обновление камер
         function updateCameras() {
             const anims = state.animatronics;
             const camStatus = { cam1: [], cam2: [], cam3: [] };
@@ -380,18 +441,32 @@
         function checkSafety() {
             const anims = state.animatronics;
             let danger = false;
-            let dangerMsg = '🔴 ВСЁ СПОКОЙНО';
+            let dangerName = '';
             for (let key in anims) {
                 const a = anims[key];
                 if (a.pos === 'office') {
                     danger = true;
-                    dangerMsg = `⚠️ ${a.name} В ОФИСЕ!`;
+                    dangerName = a.name;
                     break;
                 }
             }
-            statusText.textContent = dangerMsg;
             if (danger) {
-                gameOver('💀 ВАС НАШЛИ', `Вас нашёл ${Object.values(anims).find(a => a.pos === 'office').name}`);
+                statusText.textContent = `⚠️ ${dangerName} В ОФИСЕ!`;
+                // Проверяем, закрыта ли дверь
+                const doorClosed = state.leftDoor || state.rightDoor;
+                if (!doorClosed) {
+                    gameOver('💀 ВАС НАШЛИ', `${dangerName} пробрался в офис`);
+                } else {
+                    // Аниматроник ушёл, если дверь закрыта
+                    const anim = Object.values(anims).find(a => a.pos === 'office');
+                    if (anim) {
+                        anim.pos = 'cam1';
+                        statusText.textContent = '🚪 Дверь спасла!';
+                        updateCameras();
+                    }
+                }
+            } else {
+                statusText.textContent = '🔴 ВСЁ СПОКОЙНО';
             }
             return !danger;
         }
@@ -403,7 +478,9 @@
             const rooms = ['cam1', 'cam2', 'cam3', 'office'];
             for (let key in anims) {
                 const a = anims[key];
-                if (Math.random() < a.speed * 0.1) {
+                // Шанс движения зависит от скорости и ночи
+                const chance = a.speed * (1 + state.night * 0.1);
+                if (Math.random() < chance * 0.15) {
                     let newPos;
                     do {
                         newPos = rooms[Math.floor(Math.random() * rooms.length)];
@@ -413,10 +490,10 @@
             }
             updateCameras();
             checkSafety();
-            // Обновление отображения аниматроника в офисе
+            // Отображение аниматроника в офисе
             const officeAnim = Object.values(anims).find(a => a.pos === 'office');
             if (officeAnim) {
-                animatronicDisplay.textContent = '👾';
+                animatronicDisplay.textContent = officeAnim.emoji;
             } else {
                 animatronicDisplay.textContent = '';
             }
@@ -430,7 +507,8 @@
             clearInterval(state.powerInterval);
             clearInterval(state.moveInterval);
             resultTitle.textContent = title;
-            resultDesc.textContent = desc || 'Вы продержались ' + state.night + ' ночей';
+            resultTitle.className = '';
+            resultDesc.textContent = desc || `Вы продержались ${state.night} ночей`;
             gameOverEl.classList.add('show');
         }
 
@@ -439,28 +517,35 @@
             if (state.gameOver) return;
             state.night++;
             if (state.night > 5) {
-                // Полная победа
                 state.gameOver = true;
                 clearInterval(state.interval);
                 clearInterval(state.powerInterval);
                 clearInterval(state.moveInterval);
                 resultTitle.textContent = '🏆 ВЫ ВЫЖИЛИ!';
                 resultTitle.className = 'win';
-                resultDesc.textContent = 'Вы прошли все 5 ночей!';
+                resultDesc.textContent = 'Вы прошли все 5 ночей! Поздравляем!';
                 gameOverEl.classList.add('show');
                 return;
             }
+            // Показать уведомление о новой ночи
+            popupNight.textContent = state.night;
+            nightPopup.classList.add('show');
+            setTimeout(() => {
+                nightPopup.classList.remove('show');
+            }, 2000);
+
             nightNum.textContent = state.night;
             state.nightTimer = 0;
-            state.power = 100;
+            state.power = state.maxPower;
             powerNum.textContent = state.power;
-            statusText.textContent = '🌙 Ночь ' + state.night + ' началась';
+            statusText.textContent = `🌙 Ночь ${state.night} началась`;
             // Сброс позиций аниматроников
             const rooms = ['cam1', 'cam2', 'cam3'];
             for (let key in state.animatronics) {
                 state.animatronics[key].pos = rooms[Math.floor(Math.random() * rooms.length)];
             }
             updateCameras();
+            animatronicDisplay.textContent = '';
         }
 
         // Энергия
@@ -469,7 +554,7 @@
             let drain = 1;
             if (state.leftDoor) drain += 2;
             if (state.rightDoor) drain += 2;
-            state.power = Math.max(0, state.power - drain * 0.5);
+            state.power = Math.max(0, state.power - drain * 0.3);
             powerNum.textContent = Math.floor(state.power);
             if (state.power <= 0) {
                 gameOver('⚡ НЕТ ЭНЕРГИИ', 'Вы не смогли продержаться до утра');
@@ -488,14 +573,14 @@
         // Перезапуск
         function restartGame() {
             state.night = 1;
-            state.power = 100;
+            state.power = state.maxPower;
             state.leftDoor = false;
             state.rightDoor = false;
             state.gameOver = false;
             state.nightTimer = 0;
-            state.maxNightTime = 60;
+            state.maxNightTime = 50;
             gameOverEl.classList.remove('show');
-            gameOverEl.querySelector('h1').className = '';
+            resultTitle.className = '';
             nightNum.textContent = '1';
             powerNum.textContent = '100';
             statusText.textContent = '🔴 ВСЁ СПОКОЙНО';
@@ -517,7 +602,7 @@
         function startGame() {
             state.interval = setInterval(nightTimerTick, 1000);
             state.powerInterval = setInterval(consumePower, 1000);
-            state.moveInterval = setInterval(moveAnimatronics, 3000);
+            state.moveInterval = setInterval(moveAnimatronics, 2500);
             updateCameras();
         }
 
